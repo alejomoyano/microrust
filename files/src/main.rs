@@ -9,16 +9,17 @@ mod models;
 fn get_env() -> models::Config {
     from_filename(".env").expect("Failed to read configuration .env file");
     models::Config {
-        host : env::var("HOST").expect("Failed to read host"),
-        port : env::var("PORT").expect("Failed to read port").parse::<u16>().unwrap(),
-        db_name : env::var("DB_NAME").expect("Failed to read db name"),
-        db_user : env::var("DB_USER").expect("Failed to read db user"),
-        db_pass : env::var("DB_PASS").expect("Failed to read db pass"),
-        db_uri : env::var("DB_URI").expect("Failed to read db uri"),
+        host: env::var("HOST").expect("Failed to read host"),
+        port: env::var("PORT").expect("Failed to read port").parse::<u16>().unwrap(),
+        db_name: env::var("DB_NAME").expect("Failed to read db name"),
+        db_user: env::var("DB_USER").expect("Failed to read db user"),
+        db_pass: env::var("DB_PASS").expect("Failed to read db pass"),
+        db_uri: env::var("DB_URI").expect("Failed to read db uri"),
     }
 }
 
 async fn connect_to_mongodb() -> Database{
+    
     let config: models::Config = get_env();
 
     let client_options = ClientOptions::parse(config.db_uri)
@@ -28,19 +29,19 @@ async fn connect_to_mongodb() -> Database{
     client.database(&config.db_name)
 }
 
-#[get("/user/{user_id}")]
+#[get("/document/{document_id}")]
 async fn get_document(document: Path<models::DocumentIdentifier>) -> impl Responder {
     let connection = connect_to_mongodb().await;
     let cursor : Cursor<models::Document> = connection
         .collection("documents")
-        .find(doc! {"name": &document.document_id}, None) //TODO -> cambiar
+        .find(doc! {"user": &document.document_id}, None) //TODO -> cambiar
         .await
         .unwrap();
     let result = cursor.current();
     HttpResponse::Ok().json(result)
 }
 
-#[post("/user/insert")]
+#[post("/document/insert")]
 async fn insert_document(document_data: Json<models::Document>) -> impl Responder {
     let connection = connect_to_mongodb().await;
     let result = connection
