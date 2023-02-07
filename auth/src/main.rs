@@ -30,6 +30,7 @@ async fn connect_to_mongodb() -> Database{
 
 #[get("/user/{user_id}")]
 async fn get_user(user: Path<models::UserIdentifier>) -> impl Responder {
+    println!("Getting user");
     let connection = connect_to_mongodb().await;
     let cursor : Cursor<models::User> = connection
         .collection("users")
@@ -42,6 +43,7 @@ async fn get_user(user: Path<models::UserIdentifier>) -> impl Responder {
 
 #[post("/user/insert")]
 async fn insert_user(user_data: Json<models::User>) -> impl Responder {
+    println!("Inserting user");
     let connection = connect_to_mongodb().await;
     let result = connection
         .collection("users")
