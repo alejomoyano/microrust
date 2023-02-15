@@ -43,12 +43,30 @@ async fn get_document(document: Path<models::DocumentIdentifier>) -> impl Respon
 
 #[post("/document/insert")]
 async fn insert_document(document_data: Json<models::Document>) -> impl Responder {
+    println!("{:?}", document_data);
     let connection = connect_to_mongodb().await;
     let result = connection
         .collection("documents")
         .insert_one(document_data, None)
         .await
         .unwrap();
+    HttpResponse::Ok().json(result)
+}
+
+#[post("/document/update")]
+async fn update_document(document_data: Json<models::Document>) -> impl Responder {
+    println!("{:?}", document_data);
+    let connection = connect_to_mongodb().await;
+    let result = connection
+        .collection::<Json<models::Document>>("documents")
+        .update_one(
+            doc! {"user": &document_data.user},
+            doc! {"$set":{"content":&document_data.content, "updated_at" : &document_data.updated_at}},
+            None
+        )
+        .await
+        .unwrap();
+        
     HttpResponse::Ok().json(result)
 }
 
@@ -60,6 +78,7 @@ async fn main() -> Result<(), std::io::Error>{
         App::new()
         .service(get_document)
         .service(insert_document)
+        .service(update_document)
     })
     .bind((config.host, config.port))?
     .run()

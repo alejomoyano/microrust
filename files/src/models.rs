@@ -5,11 +5,19 @@ pub struct DocumentIdentifier {
     pub document_id: String,
 }
 
+#[derive(Debug)]
 #[derive(Deserialize,Serialize)]
 pub struct Document{
     pub content: String,
     pub user: String,
     pub created_at: String,
+    pub updated_at: String
+}
+
+#[derive(Deserialize,Serialize)]
+pub struct UpdateDocument{
+    pub content: String,
+    pub user: String,
     pub updated_at: String
 }
 
